@@ -29,5 +29,7 @@ app.use('/upload', express.static(path.join(__dirname, 'upload')));
 app.use(cookieParser());
 import userRouter from "./src/router/user.router.js"
 app.use("/api/v1/user",userRouter);
+import projectRouter from "./src/router/project.router.js"
+app.use("/api/v1/project",projectRouter);
 
 export { app }
