@@ -30,7 +30,7 @@ const projectSchema = new mongoose.Schema({
         required:true,
         unique:true,
     },
-    userId:{
+    user_id:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"User",
         required:true,
