@@ -1,5 +1,10 @@
 import mongoose from "mongoose"
 import bcrypt from "bcryptjs";
+const counterSchema = new mongoose.Schema({
+  name: { type: String, required: true, unique: true },
+  value: { type: Number, default: 0 },
+});
+const Counter = mongoose.models.Counter || mongoose.model("Counter", counterSchema);
 const userSchema = new mongoose.Schema({
     fullName:{
         type:String,
@@ -30,7 +35,7 @@ const userSchema = new mongoose.Schema({
     },
     user_id:{
         type:String,
-        required:true,
+        
         unique:true
     }
 
@@ -45,7 +50,7 @@ userSchema.pre("validate",async function(next)
         { new: true, upsert: true }
       );
       const formattedId = counter.value.toString().padStart(4, "0");
-      this.User_id = `User_${formattedId}`;
+      this.user_id = `User_${formattedId}`;
       next();
     } catch (err) {
       next(err);
