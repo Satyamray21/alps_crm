@@ -27,14 +27,14 @@ router.get(
 router.get(
   "/:project_id",
   isAuthenticated,
-  authorizeRoles("admin", "client"),
+  authorizeRoles("Admin", "Client"),
   viewProjectById
 );
 
 router.put(
   "/:project_id",
   isAuthenticated,
-  authorizeRoles("admin"),
+  authorizeRoles("Admin"),
   updateProject
 );
 

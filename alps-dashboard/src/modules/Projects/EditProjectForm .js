@@ -1,28 +1,28 @@
+// modules/Projects/EditProjectForm.js
 import React, { useEffect } from 'react';
 import {
-  Box, TextField, Button, MenuItem, Paper, Typography
+  Box, TextField, Button, MenuItem, Paper, Typography, CircularProgress
 } from '@mui/material';
 import { useFormik } from 'formik';
 import { useNavigate, useParams } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
 import * as Yup from 'yup';
-import { createProject, getProjectById, updateProject } from '../../features/project/projectSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { getProjectById, updateProject } from '../../features/project/projectSlice';
 
 const statusOptions = ['active', 'on-hold', 'completed'];
 
-const ProjectForm = () => {
+const EditProjectForm = () => {
   const { projectId } = useParams();
-  const isEdit = Boolean(projectId);
-  const dispatch = useDispatch();
   const navigate = useNavigate();
+  const dispatch = useDispatch();
 
-  const { selectedProject, loading, error } = useSelector((state) => state.project);
+  const { currentProject, loading, error } = useSelector((state) => state.project);
 
   useEffect(() => {
-    if (isEdit) {
+    if (projectId) {
       dispatch(getProjectById(projectId));
     }
-  }, [dispatch, isEdit, projectId]);
+  }, [dispatch, projectId]);
 
   const formik = useFormik({
     initialValues: {
@@ -36,39 +36,55 @@ const ProjectForm = () => {
       title: Yup.string().required('Title is required'),
       status: Yup.string().required('Status is required'),
       startDate: Yup.string().required('Start Date is required'),
-      endDate: Yup.string().required('End Date is required'),
+      endDate: Yup.string().required('End Date is required')
     }),
     onSubmit: async (values) => {
-      try {
-        if (isEdit) {
-          await dispatch(updateProject({ projectId, updatedData: values })).unwrap();
-        } else {
-          await dispatch(createProject(values)).unwrap();
-        }
-        navigate('/projects');
-      } catch (err) {
-        console.error('Form submit failed:', err);
-      }
+      await dispatch(updateProject({ project_id: projectId, updatedData: values }));
+      navigate('/projects');
     },
     enableReinitialize: true
   });
 
   useEffect(() => {
-    if (isEdit && selectedProject) {
+    if (currentProject) {
       formik.setValues({
-        title: selectedProject.title || '',
-        description: selectedProject.description || '',
-        status: selectedProject.status || '',
-        startDate: selectedProject.startDate?.split('T')[0] || '',
-        endDate: selectedProject.endDate?.split('T')[0] || '',
+        title: currentProject.title || '',
+        description: currentProject.description || '',
+        status: currentProject.status || '',
+        startDate: currentProject.startDate?.split('T')[0] || '',
+        endDate: currentProject.endDate?.split('T')[0] || ''
       });
     }
-  }, [selectedProject, isEdit]);
+  }, [currentProject]);
+
+  if (loading) {
+    return (
+      <Box mt={10} display="flex" justifyContent="center">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Typography variant="h6" color="error" mt={4} textAlign="center">
+        ❌ {error}
+      </Typography>
+    );
+  }
+
+  if (!currentProject) {
+    return (
+      <Typography variant="h6" textAlign="center" mt={4}>
+        🚫 Project not found.
+      </Typography>
+    );
+  }
 
   return (
     <Paper elevation={6} sx={{ p: 4, mt: 4, borderRadius: 3, maxWidth: 700, mx: 'auto' }}>
       <Typography variant="h5" fontWeight="bold" color="primary.main" mb={3}>
-        {isEdit ? '✏️ Edit Project' : '➕ Add New Project'}
+        ✏️ Edit Project
       </Typography>
 
       <form onSubmit={formik.handleSubmit}>
@@ -137,11 +153,10 @@ const ProjectForm = () => {
           <Button
             type="submit"
             variant="contained"
-            color="primary"
             fullWidth
             sx={{ mt: 2, textTransform: 'none' }}
           >
-            {isEdit ? 'Update Project' : 'Create Project'}
+            Update Project
           </Button>
         </Box>
       </form>
@@ -149,4 +164,4 @@ const ProjectForm = () => {
   );
 };
 
-export default ProjectForm;
+export default EditProjectForm;

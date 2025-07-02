@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-import { Project } from "./project.model";
+import { Project } from "../models/project.model.js";
+import {User} from "../models/user.model.js";
 const counterSchema = new mongoose.Schema({
   name: { type: String, required: true, unique: true },
   value: { type: Number, default: 0 },
@@ -29,7 +30,7 @@ status:
     required:true,
  },
  projectId:{
-    type:mongoose.Schema.Types.ObjectId,
+    type:String,
     ref:Project,
     required:true
  },

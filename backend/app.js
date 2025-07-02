@@ -31,5 +31,6 @@ import userRouter from "./src/router/user.router.js"
 app.use("/api/v1/user",userRouter);
 import projectRouter from "./src/router/project.router.js"
 app.use("/api/v1/project",projectRouter);
-
+import ticketRouter from "./src/router/ticket.router.js"
+app.use("/api/v1/ticket",ticketRouter)
 export { app }

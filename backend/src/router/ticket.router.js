@@ -7,14 +7,19 @@ import {
   deleteTicket,
   changeTicketStatus,
 } from "../controllers/ticket.controller.js";
-
+import {isAuthenticated, authorizeRoles } from "../middleware/auth.middleware.js"
 const router = express.Router();
 
 
-router.post("/", createTicket);
+router.post("/", isAuthenticated,createTicket);
 
 
-router.get("/", getAllTickets);
+router.get(
+  "/all-tickets",
+  isAuthenticated,         // ✅ this populates req.user
+  authorizeRoles("Admin", "Client"), // optional: restrict to roles
+  getAllTickets
+);
 
 
 router.get("/:ticket_id", getTicketById);
