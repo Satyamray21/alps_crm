@@ -3,34 +3,54 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import { ApiError } from "../utils/ApiError.js";
 import { ApiResponse } from "../utils/ApiResponse.js";
 import {User} from "../models/user.model.js"
+import mongoose from "mongoose";
 // CREATE PROJECT (Admin only)
 export const createProject = asyncHandler(async (req, res) => {
- 
-
   const { title, description, status, startDate, endDate, user_id } = req.body;
 
-
-  if (!title || !description || !status || !startDate || !endDate || !user_id) {
-    throw new ApiError(400, "All fields including user_id (client) are required");
+  if (!title || !description || !status || !startDate || !endDate) {
+    throw new ApiError(400, "All required fields must be provided");
   }
 
-  const existingUser = await User.findOne({user_id, role: "Client" });
-  if (!existingUser) {
-    throw new ApiError(404, "Client (user_id) does not exist");
+  let clientId;
+
+  if (req.user.role === "Admin") {
+    // Admin must provide a valid client user_id
+    if (!user_id) {
+      throw new ApiError(400, "user_id (Client) is required for Admin");
+    }
+
+    const existingClient = await User.findOne({
+      user_id: user_id,
+      role: "Client"
+    });
+
+    if (!existingClient) {
+      throw new ApiError(404, "Client (user_id) does not exist");
+    }
+
+    clientId = existingClient._id;
+  } else if (req.user.role === "Client") {
+    // Clients can only assign projects to themselves
+    clientId = req.user._id;
+  } else {
+    throw new ApiError(403, "Unauthorized role");
   }
 
-  // Create project
   const project = await Project.create({
     title,
     description,
     status,
     startDate,
     endDate,
-    user_id:existingUser._id
+    user_id: clientId
   });
 
-  res.status(201).json(new ApiResponse(201, project, "Project created successfully"));
+  res
+    .status(201)
+    .json(new ApiResponse(201, project, "Project created successfully"));
 });
+
 
 // GET SINGLE PROJECT (Admin & Client)
 export const viewProjectById = asyncHandler(async (req, res) => {
@@ -53,11 +73,13 @@ export const viewProjectById = asyncHandler(async (req, res) => {
 // GET ALL PROJECTS (Admin: all, Client: own only)
 export const getAllProject = asyncHandler(async (req, res) => {
   const filter = {};
-  if (req.user.role === "client") {
-    filter.userId = req.user._id;
+  console.log("Logged-in user:", req.user);
+   if (req.user.role === "Client") {
+    filter.user_id = new mongoose.Types.ObjectId(req.user._id);
+    console.log("Filter for Client:", filter);
   }
 
-  const projects = await Project.find(filter).populate("userId", "fullName email");
+  const projects = await Project.find(filter).populate("user_id", "fullName email");
 
   if (!projects || projects.length === 0) {
     throw new ApiError(404, "No projects found");
