@@ -30,8 +30,8 @@ const MainRoute = () => {
                 <Route element={<Layout />}>
                     <Route path="/" element={<Dashboard />} />
                     <Route path="/clients" element={<ClientList />} />
-                    <Route path="/clients/:clientId" element={<ClientProfile />} />
-                    <Route path="/clients/edit/:clientId" element={<ClientForm />} />
+                    <Route path="/clients/:user_id" element={<ClientProfile />} />
+                    <Route path="/clients/edit/:user_id" element={<ClientForm />} />
                     <Route path="/projects" element={<ProjectList />} />
                     <Route path="/projects/new" element={<ProjectForm />} />
                     <Route path="/projects/edit/:projectId" element={<EditProjectForm />} />
