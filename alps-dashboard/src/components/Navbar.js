@@ -21,22 +21,23 @@ import {
 } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
-
+import {loginUser,logoutUser} from "../features/user/userSlice";
+import { useSelector,useDispatch } from 'react-redux';
 const Navbar = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const navigate = useNavigate();
   const location = useLocation();
-
+  const dispatch = useDispatch();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [anchorEl, setAnchorEl] = useState(null);
 
   const isLoggedIn = !!localStorage.getItem('token');
-  const user = JSON.parse(localStorage.getItem('user')) || {
-    fullName: 'Guest User',
-    email: 'guest@example.com',
-  };
-
+  const { currentUser } = useSelector((state) => state.user);
+  const user = currentUser || {
+  fullName: 'Guest User',
+  email: 'guest@example.com',
+};
   const navItems = [
     { label: 'Dashboard', to: '/' },
     { label: 'Clients', to: '/clients' },
@@ -45,10 +46,9 @@ const Navbar = () => {
   ];
 
   const handleLogout = () => {
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
-    navigate('/login');
-  };
+  dispatch(logoutUser());
+  navigate('/login');
+};
 
   const handleProfileClick = (e) => setAnchorEl(e.currentTarget);
   const handleProfileClose = () => setAnchorEl(null);

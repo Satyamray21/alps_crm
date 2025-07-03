@@ -1,4 +1,4 @@
-// --- modules/Clients/ClientList.js ---
+
 import React, { useEffect, useState } from 'react';
 import {
   Paper, Table, TableHead, TableRow, TableCell, TableBody,
@@ -9,6 +9,9 @@ import EditIcon from '@mui/icons-material/Edit';
 import DeleteIcon from '@mui/icons-material/Delete';
 import SearchIcon from '@mui/icons-material/Search';
 import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { getAllUsers } from '../../features/user/userSlice'; 
+
 
 const initialClients = [
   { id: 1, name: 'Acme Corp', email: 'acme@example.com', projects: [101, 102], tickets: [201, 202] },
@@ -20,7 +23,8 @@ const ClientList = () => {
   const role = localStorage.getItem('role');
   const [search, setSearch] = useState('');
   const [filteredClients, setFilteredClients] = useState(initialClients);
-
+  const dispatch = useDispatch();
+const { users, loading } = useSelector((state) => state.user);
   // useEffect(() => {
   //   if (!role || role !== 'admin') {
   //     alert('Unauthorized access. Admins only.');
@@ -28,13 +32,18 @@ const ClientList = () => {
   //   }
   // }, [role, navigate]);
 
+ 
   useEffect(() => {
-    const filtered = initialClients.filter(client =>
-      client.name.toLowerCase().includes(search.toLowerCase()) ||
-      client.email.toLowerCase().includes(search.toLowerCase())
-    );
-    setFilteredClients(filtered);
-  }, [search]);
+  dispatch(getAllUsers());
+}, [dispatch]);
+useEffect(() => {
+  const clientList = users.filter(user =>
+    user.role === 'Client' &&
+    (user.fullName.toLowerCase().includes(search.toLowerCase()) ||
+     user.email.toLowerCase().includes(search.toLowerCase()))
+  );
+  setFilteredClients(clientList);
+}, [search, users]);
 
   const handleDelete = (id) => {
     const confirm = window.confirm('Are you sure you want to delete this client?');
@@ -88,11 +97,11 @@ const ClientList = () => {
             <TableBody>
               {filteredClients.map(client => (
                 <TableRow key={client.id} sx={{ backgroundColor: '#fff', transition: '0.2s', '&:hover': { backgroundColor: '#e3f2fd', transform: 'scale(1.01)', boxShadow: '0 2px 12px rgba(0,0,0,0.05)' } }}>
-                  <TableCell>{client.id}</TableCell>
+                  <TableCell>{client.user_id}</TableCell>
                   <TableCell>{client.name}</TableCell>
                   <TableCell>{client.email}</TableCell>
-                  <TableCell>{client.projects.join(', ')}</TableCell>
-                  <TableCell>{client.tickets.join(', ')}</TableCell>
+                  <TableCell>{client.project_id.}</TableCell>
+                  <TableCell>{client.ticket_id}</TableCell>
                   <TableCell align="center">
                     <Box display="flex" justifyContent="center" gap={1}>
                       <Button

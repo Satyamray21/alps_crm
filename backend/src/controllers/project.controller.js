@@ -58,17 +58,18 @@ export const viewProjectById = asyncHandler(async (req, res) => {
 
   if (!project_id) throw new ApiError(400, "Project ID is required");
 
-  const project = await Project.findOne({ project_id }).populate("userId", "fullName email");
+  const project = await Project.findOne({ project_id }).populate("user_id", "fullName email");
 
   if (!project) throw new ApiError(404, "Project not found");
 
-  // If client, ensure only their own project is returned
-  if (req.user.role === "client" && req.user._id.toString() !== project.userId._id.toString()) {
+  // Check access if Client
+  if (req.user.role === "Client" && req.user._id.toString() !== project.user_id._id.toString()) {
     throw new ApiError(403, "Access denied");
   }
 
   res.status(200).json(new ApiResponse(200, project, "Project fetched successfully"));
 });
+
 
 // GET ALL PROJECTS (Admin: all, Client: own only)
 export const getAllProject = asyncHandler(async (req, res) => {
